@@ -11,10 +11,12 @@ from src.settings import Player
 class Missile(pygame.sprite.Sprite):
     """Missile class representing the player's missiles."""
 
+    IMAGE_PATH = 'assets/images/missile.png'
+
     def __init__(self, x: int, y: int):
         """Initialize the missile."""
         super().__init__()
-        self.image = pygame.image.load('assets/images/missile.png').convert_alpha()
+        self.image = pygame.image.load(self.IMAGE_PATH).convert_alpha()
         self.rect = self.image.get_rect(center=(x, y))
     
     def update(self):
