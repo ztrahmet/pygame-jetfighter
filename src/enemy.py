@@ -14,6 +14,9 @@ class Enemy(pygame.sprite.Sprite):
     # Image source
     IMAGE_PATH = 'assets/images/enemy.png'
 
+    # Enemy configuration
+    SPEED = Enemy_CONFIG.SPEED
+
     def __init__(self, x: int, y: int):
         """Initialize the enemy."""
         super().__init__()
@@ -22,6 +25,6 @@ class Enemy(pygame.sprite.Sprite):
     
     def update(self):
         """Update enemy position."""
-        self.rect.y += Enemy_CONFIG.SPEED
+        self.rect.y += self.SPEED
         if self.rect.top > Screen.HEIGHT:
             self.kill()

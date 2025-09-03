@@ -11,7 +11,11 @@ from src.settings import Player
 class Missile(pygame.sprite.Sprite):
     """Missile class representing the player's missiles."""
 
+    # Image source
     IMAGE_PATH = 'assets/images/missile.png'
+
+    # Missile Configuration
+    SPEED = Player.MISSILE_SPEED
 
     def __init__(self, x: int, y: int):
         """Initialize the missile."""
@@ -21,6 +25,6 @@ class Missile(pygame.sprite.Sprite):
     
     def update(self):
         """Update missile position."""
-        self.rect.y -= Player.MISSILE_SPEED
+        self.rect.y -= self.SPEED
         if self.rect.bottom < 0:
             self.kill()
