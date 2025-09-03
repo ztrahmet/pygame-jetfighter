@@ -10,11 +10,17 @@ class Screen:
     WIDTH = 800
     HEIGHT = 600
     FPS = 60
+    BACKGROUND_IMAGE = 'assets/images/background.png'
+
+
+class Game:
+    """Game configuration constants."""
+    DIFFICULTY = 'Normal'
 
 
 class Player:
     """Player configuration constants."""
-    SPEED = 5
+    SPEED = 6
     MISSILE_SPEED = 7
 
 
