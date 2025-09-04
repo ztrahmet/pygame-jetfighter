@@ -39,9 +39,9 @@ class Game:
     def create_menu_buttons(self):
         center_x = Screen.WIDTH // 2 - 100
         buttons = [
-            Button("Play", center_x, 220, 200, 60, self.start_play),
-            Button("Settings", center_x, 320, 200, 60, self.open_settings),
-            Button("Quit", center_x, 420, 200, 60, self.quit_game),
+            Button("Play", center_x, 180, 200, 60, self.start_play),
+            Button("Settings", center_x, 250, 200, 60, self.open_settings),
+            Button("Quit", center_x, 320, 200, 60, self.quit_game),
         ]
         self.menu_buttons = ButtonGroup(buttons)
 
@@ -69,7 +69,15 @@ class Game:
         self.screen.fill((0, 0, 30))
         title = self.title_font.render("Jet Fighter", True, (255, 255, 0))
         self.screen.blit(title, (Screen.WIDTH // 2 - title.get_width() // 2, 100))
+
+        # Draw buttons
         self.menu_buttons.draw(self.screen)
+
+        # Footer (bottom-left)
+        footer_font = pygame.font.SysFont(None, 20) # small font
+        footer_text = footer_font.render('CS50x 2025: Final Project', True, (200, 200, 200))
+        self.screen.blit(footer_text, (10, Screen.HEIGHT - 25))
+        
         pygame.display.flip()
 
     # ---------------- PLAY ----------------

@@ -6,6 +6,7 @@ Main gameplay logic and loop for Jet Fighter.
 
 import pygame
 import random
+from src.boss import Boss
 from src.database import Database
 from src.enemy import Enemy
 from src.explosion import Explosion
@@ -75,9 +76,9 @@ class Play:
             case 'Easy':
                 return int(Screen.FPS * 1.7)  # 1 enemy every 1.7 seconds
             case 'Hard':
-                return int(Screen.FPS / 1.2)  # 1.2 enemies per second
+                return int(Screen.FPS / 1.3)  # 1.3 enemies per second
             case _:
-                return int(Screen.FPS * 1.2)  # Default: 1 enemy per 1.2 second
+                return int(Screen.FPS * 1.3)  # Default: 1 enemy per 1.3 second
 
     def run(self):
         """Main gameplay loop."""
@@ -129,14 +130,23 @@ class Play:
         # Spawn enemies randomly
         if random.randint(1, self.enemy_spawn_rate) == 1:
             self.spawn_enemy()
+        
+        # Rare boss spawn
+        if random.randint(1, self.enemy_spawn_rate * 10) == 1:
+            self.spawn_enemy(is_boss=True)
 
         # Handle collisions
         self.handle_collisions()
 
-    def spawn_enemy(self):
+    def spawn_enemy(self, is_boss: bool = False):
         """Spawn a new enemy at a random x position."""
+        if is_boss:
+            sprite_cls = Boss
+        else:
+            sprite_cls = Enemy
+
         enemy_half_width = pygame.image.load(Enemy.IMAGE_PATH).get_width() // 2
-        enemy = Enemy(
+        enemy = sprite_cls(
             random.randint(enemy_half_width, Screen.WIDTH - enemy_half_width),
             -enemy_half_width,
         )
@@ -150,8 +160,11 @@ class Play:
         hits = pygame.sprite.groupcollide(self.missiles, self.enemies, True, True)
         for _, enemies_hit in hits.items():
             for enemy in enemies_hit:
+                if isinstance(enemy, Boss):
+                    self.missiles_remaining += 3
+                else:
+                    self.missiles_remaining += 1
                 self.score += 1
-                self.missiles_remaining += 1
                 explosion = Explosion(enemy.rect.centerx, enemy.rect.centery)
                 self.all_sprites.add(explosion)
 

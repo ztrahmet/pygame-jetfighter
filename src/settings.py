@@ -45,8 +45,8 @@ class SettingsGUI:
 
     def create_buttons(self):
         center_x = Screen.WIDTH // 2 - 100
-        y_start = 200
-        spacing = 80
+        y_start = 180
+        spacing = 70
 
         buttons = []
 
