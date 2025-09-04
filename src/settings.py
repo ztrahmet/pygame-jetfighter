@@ -16,6 +16,8 @@ class Screen:
 class Game:
     """Game configuration constants."""
     DIFFICULTY = 'Normal'
+    HEART = 3
+    MISSILES = 5
 
 
 class Player:

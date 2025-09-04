@@ -21,6 +21,8 @@ class Game:
         """Initialize the game."""
         pygame.init()
 
+        self.db = Database()
+
         # Game state
         self.running = True
 
@@ -52,8 +54,8 @@ class Game:
 
         # Game stats
         self.score = 0
-        self.lives = 3
-        self.missiles_remaining = 5
+        self.heart_remaining = Game_CONFIG.HEART
+        self.missiles_remaining = Game_CONFIG.MISSILES
 
         # Font
         self.font = pygame.font.SysFont(None, 36)
@@ -85,13 +87,11 @@ class Game:
         self.player.update(keys)
 
         # Check for game over
-        if self.lives <= 0 or (self.missiles_remaining <= 0 and len(self.missiles) == 0):
+        if self.heart_remaining <= 0 or (self.missiles_remaining <= 0 and len(self.missiles) == 0):
             self.running = False
-            db = Database()
-            db.save_score(self.score)
+            self.db.save_score(self.score)
             print(f"Game Over! Your score: {self.score}")
-            print("Top Scores:", db.get_high_scores(5))
-            return
+            print("Top Scores:", self.db.get_high_scores(5))
 
         # Update all other sprites (except player)
         for sprite in self.all_sprites:
@@ -124,10 +124,16 @@ class Game:
         # Enemy-player collisions (both explode)
         hits = pygame.sprite.spritecollide(self.player, self.enemies, True)
         for hit in hits:
-            self.lives -= 1
+            self.heart_remaining -= 1
             explosion = Explosion(hit.rect.centerx, hit.rect.centery)
             self.player.blink() # Start player blink effect
             self.all_sprites.add(explosion)
+
+        # Enemy reachs bottom
+        for enemy in list(self.enemies):
+            if enemy.reached == True:
+                self.heart_remaining -= 1
+                enemy.kill()
 
     def draw(self):
         """Draw all game elements."""

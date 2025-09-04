@@ -22,9 +22,11 @@ class Enemy(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.image.load(self.IMAGE_PATH).convert_alpha()
         self.rect = self.image.get_rect(center=(x, y))
+        self.reached = False
     
     def update(self):
         """Update enemy position."""
         self.rect.y += self.SPEED
-        if self.rect.top > Screen.HEIGHT:
-            self.kill()
+        if self.rect.top > Screen.HEIGHT: # If enemy reaches bottom
+            self.reached = True
+            # Kill self in game.py
