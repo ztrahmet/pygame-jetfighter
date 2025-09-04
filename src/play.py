@@ -17,6 +17,11 @@ from src.gameover import GameOver
 
 class Play:
     """Class that handles the main game loop."""
+    
+    # HUD Image Source
+    SCORE_IMAGE = 'assets/images/score.png'
+    HEART_IMAGE = 'assets/images/heart.png'
+    MISSILE_IMAGE = 'assets/images/missile.png'
 
     def __init__(self):
         pygame.init()
@@ -54,6 +59,10 @@ class Play:
 
         # Fonts
         self.font = pygame.font.SysFont(None, 36)
+        
+        self.score_image = pygame.image.load(self.SCORE_IMAGE).convert_alpha()
+        self.heart_image = pygame.image.load(self.HEART_IMAGE).convert_alpha()
+        self.missile_image = pygame.image.load(self.MISSILE_IMAGE).convert_alpha()
 
     def get_spawn_rate(self, difficulty: str) -> int:
         """Return spawn rate (in frames) based on difficulty setting."""
@@ -161,18 +170,37 @@ class Play:
         )
         self.screen.blit(background, (0, 0))
 
-        # Sprites
+        # Draw all sprites
         self.all_sprites.draw(self.screen)
 
-        # HUD
-        hud_text = self.font.render(
-            f"Score: {self.score}  Hearts: {self.heart_remaining}  Missiles: {self.missiles_remaining}",
-            True,
-            (255, 255, 255),
-        )
-        self.screen.blit(hud_text, (10, 10))
+        # Draw HUD on top
+        self.draw_hud()
 
         pygame.display.flip()
+    
+    def draw_hud(self):
+        """Draw hearts, missiles, and score with count next to icons."""
+
+        # Fonts
+        font_count = pygame.font.SysFont(None, 36)
+
+        # Score at top-left
+        score_icon = pygame.transform.scale(self.score_image, (40, 40))
+        self.screen.blit(score_icon, (20, 20))
+        score_text = font_count.render(str(self.score), True, (255, 255, 255))
+        self.screen.blit(score_text, (70, 25))
+
+        # Hearts at top-right
+        heart_icon = pygame.transform.scale(self.heart_image, (40, 40))
+        self.screen.blit(heart_icon, (Screen.WIDTH - 150, 20))
+        heart_text = font_count.render(f"x{self.heart_remaining}", True, (255, 255, 255))
+        self.screen.blit(heart_text, (Screen.WIDTH - 100, 25))
+
+        # Missiles next to hearts
+        missile_icon = pygame.transform.scale(self.missile_image, (40, 40))
+        self.screen.blit(missile_icon, (Screen.WIDTH - 150, 80))
+        missile_text = font_count.render(f"x{self.missiles_remaining}", True, (255, 255, 255))
+        self.screen.blit(missile_text, (Screen.WIDTH - 100, 85))
 
     # ---------------- End game ----------------
     def end_game(self):
