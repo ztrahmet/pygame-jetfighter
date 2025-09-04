@@ -73,11 +73,11 @@ class Play:
         """Return spawn rate (in frames) based on difficulty setting."""
         match difficulty:
             case 'Easy':
-                return Screen.FPS * 2     # 1 enemy every 2 seconds
+                return int(Screen.FPS * 1.7)  # 1 enemy every 1.7 seconds
             case 'Hard':
-                return Screen.FPS // 2    # 2 enemies per second
+                return int(Screen.FPS / 1.2)  # 1.2 enemies per second
             case _:
-                return Screen.FPS         # Default: 1 enemy per second
+                return int(Screen.FPS * 1.2)  # Default: 1 enemy per 1.2 second
 
     def run(self):
         """Main gameplay loop."""
