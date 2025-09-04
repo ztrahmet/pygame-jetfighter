@@ -219,7 +219,7 @@ class Play:
     def end_game(self):
         """Handle end of game: save score and show Game Over screen."""
         self.running = False
-        self.db.save_score(self.score)
+        self.db.save_score(self.score, Game_CONFIG.DIFFICULTY)
 
         # Play game over sound
         pygame.mixer.Sound(self.GAMEOVER_SOUND).play()

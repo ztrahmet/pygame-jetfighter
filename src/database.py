@@ -41,12 +41,13 @@ class Database:
                 CREATE TABLE IF NOT EXISTS scores (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     score INTEGER NOT NULL,
+                    difficulty TEXT NOT NULL,
                     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
             conn.commit()
 
-    def save_score(self, score: int):
+    def save_score(self, score: int, difficulty: str):
         """
         Save a player's score to the database.
 
@@ -55,8 +56,8 @@ class Database:
         """
         with self._connect() as conn:
             conn.execute(
-                'INSERT INTO scores (score) VALUES (?)',
-                (score,)
+                'INSERT INTO scores (score, difficulty) VALUES (?, ?)',
+                (score, difficulty)
             )
             conn.commit()
 
@@ -88,7 +89,7 @@ class Database:
         """
         with self._connect() as conn:
             cursor: Cursor = conn.execute(
-                'SELECT score, date FROM scores ORDER BY score DESC LIMIT ?',
+                'SELECT score, difficulty, date FROM scores ORDER BY score DESC LIMIT ?',
                 (limit,)
             )
             return cursor.fetchall()

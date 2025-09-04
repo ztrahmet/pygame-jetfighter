@@ -67,33 +67,31 @@ class GameOver:
         table_width = sum(col_widths) + 40
         start_x = Screen.WIDTH//2 - table_width//2
 
-        col_rank = start_x
-        col_score = col_rank + col_widths[0] + 20
-        col_date = col_score + col_widths[1] + 20
+        col_score = start_x
+        col_difficulty = col_score + col_widths[0] + 20
+        col_date = col_difficulty + col_widths[1] + 20
 
-        header_rank = self.font_header.render("Rank", True, (255,255,0))
         header_score = self.font_header.render("Score", True, (255,255,0))
+        header_difficulty = self.font_header.render("Difficulty", True, (255,255,0))
         header_date = self.font_header.render("Date", True, (255,255,0))
 
-        self.screen.blit(header_rank, (col_rank, header_y))
         self.screen.blit(header_score, (col_score, header_y))
+        self.screen.blit(header_difficulty, (col_difficulty, header_y))
         self.screen.blit(header_date, (col_date, header_y))
 
         pygame.draw.line(self.screen, (255,255,255), (start_x, header_y+50), (start_x+table_width, header_y+50), 2)
 
         # Table rows
         row_y = header_y + 70
-        rank = 1
         for entry in self.top_scores:
-            rank_text = self.font_cell.render(str(rank), True, (255,255,255))
             score_text = self.font_cell.render(str(entry[0]), True, (255,255,255))
-            date_text = self.font_cell.render(str(entry[1]), True, (255,255,255))
+            difficulty_text = self.font_cell.render(str(entry[1]), True, (255,255,255))
+            date_text = self.font_cell.render(str(entry[2]), True, (255,255,255))
 
-            self.screen.blit(rank_text, (col_rank, row_y))
             self.screen.blit(score_text, (col_score, row_y))
+            self.screen.blit(difficulty_text, (col_difficulty, row_y))
             self.screen.blit(date_text, (col_date, row_y))
             row_y += 50
-            rank += 1
 
         self.button_group.draw(self.screen)
         pygame.display.flip()
