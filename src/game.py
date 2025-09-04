@@ -13,14 +13,23 @@ from src.settings import SettingsGUI
 class Game:
     """Main game class handling menu and navigation."""
 
+    # Sound source
+    MUSIC_SOUND = 'assets/sounds/music.wav'
+
     def __init__(self):
         pygame.init()
         self.running = True
         self.state = "menu"
 
+        # Setup Screen
         self.screen = pygame.display.set_mode((Screen.WIDTH, Screen.HEIGHT))
         pygame.display.set_caption("Jet Fighter")
         self.clock = pygame.time.Clock()
+
+        # Start background music
+        #pygame.mixer.music.load(self.MUSIC_SOUND)
+        #pygame.mixer.music.set_volume(0.2)
+        #pygame.mixer.music.play(-1) # loop
 
         self.title_font = pygame.font.SysFont(None, 72)
 

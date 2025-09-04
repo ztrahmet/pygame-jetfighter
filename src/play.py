@@ -23,6 +23,11 @@ class Play:
     HEART_IMAGE = 'assets/images/heart.png'
     MISSILE_IMAGE = 'assets/images/missile.png'
 
+    # Sound Source
+    MILESTONE_SOUND = 'assets/sounds/milestone.wav'
+    GAMEOVER_SOUND = 'assets/sounds/gameover.wav'
+    GAMESTART_SOUND = 'assets/sounds/gamestart.wav'
+
     def __init__(self):
         pygame.init()
 
@@ -76,6 +81,9 @@ class Play:
 
     def run(self):
         """Main gameplay loop."""
+        # Play game start sound
+        pygame.mixer.Sound(self.GAMESTART_SOUND).play()
+
         while self.running:
             self.clock.tick(Screen.FPS)
             self.handle_events()
@@ -147,6 +155,11 @@ class Play:
                 explosion = Explosion(enemy.rect.centerx, enemy.rect.centery)
                 self.all_sprites.add(explosion)
 
+                # Milestone sound on each 10 scores
+                if self.score % 10 == 0:
+                    pygame.mixer.Sound(self.MILESTONE_SOUND).play()
+
+
         # Enemy-player
         hits = pygame.sprite.spritecollide(self.player, self.enemies, True)
         for hit in hits:
@@ -207,6 +220,9 @@ class Play:
         """Handle end of game: save score and show Game Over screen."""
         self.running = False
         self.db.save_score(self.score)
+
+        # Play game over sound
+        pygame.mixer.Sound(self.GAMEOVER_SOUND).play()
 
         # Capture the current screen
         background_snapshot = self.screen.copy()
