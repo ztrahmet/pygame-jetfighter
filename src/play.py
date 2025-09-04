@@ -14,6 +14,7 @@ from src.missile import Missile
 from src.player import Player
 from src.settings import Screen, Game as Game_CONFIG
 from src.gameover import GameOver
+from typing import List, Tuple # type hints for older Python versions (<3.9)
 
 
 class Play:
@@ -56,7 +57,7 @@ class Play:
         self.all_sprites.add(self.player)
 
         # Difficulty spawn rate
-        self.enemy_spawn_rate = self.get_spawn_rate(Game_CONFIG.DIFFICULTY)
+        self.enemy_spawn_rate, self.enemy_limit = self.get_difficulty(Game_CONFIG.DIFFICULTY)
 
         # Stats
         self.score = 0
@@ -70,15 +71,15 @@ class Play:
         self.heart_image = pygame.image.load(self.HEART_IMAGE).convert_alpha()
         self.missile_image = pygame.image.load(self.MISSILE_IMAGE).convert_alpha()
 
-    def get_spawn_rate(self, difficulty: str) -> int:
+    def get_difficulty(self, difficulty: str) -> Tuple[int, int]:# spawn rate and limit
         """Return spawn rate (in frames) based on difficulty setting."""
         match difficulty:
             case 'Easy':
-                return int(Screen.FPS * 1.7)  # 1 enemy every 1.7 seconds
+                return int(Screen.FPS), 2        # 1 enemy per second, limit 1 at a time
             case 'Hard':
-                return int(Screen.FPS / 1.3)  # 1.3 enemies per second
+                return int(Screen.FPS), 5        # 1 enemy per second, limit 5 at a time
             case _:
-                return int(Screen.FPS * 1.3)  # Default: 1 enemy per 1.3 second
+                return int(Screen.FPS), 3        # Default: 1 enemy per second, limit 3 at a time
 
     def run(self):
         """Main gameplay loop."""
@@ -127,10 +128,11 @@ class Play:
             if sprite != self.player:
                 sprite.update()
 
-        # Spawn enemies randomly
-        if random.randint(1, self.enemy_spawn_rate) == 1:
-            self.spawn_enemy()
-        
+        # Always ensure at least one enemy, otherwise spawn by chance (respecting limit)
+        if len(self.enemies) < self.enemy_limit:
+            if random.randint(1, self.enemy_spawn_rate) == 1:
+                self.spawn_enemy()
+
         # Rare boss spawn
         if random.randint(1, self.enemy_spawn_rate * 10) == 1:
             self.spawn_enemy(is_boss=True)

@@ -7,6 +7,7 @@ Global configuration constants for the game, including screen, player, and enemy
 import pygame
 from src.button import Button, ButtonGroup
 
+DIFFICULTIES = ['Easy', 'Normal', 'Hard']
 
 class Screen:
     """Screen configuration constants."""
@@ -51,14 +52,14 @@ class SettingsGUI:
         buttons = []
 
         # Difficulty buttons
-        for i, diff in enumerate(["Easy", "Normal", "Hard"]):
+        for i, diff in enumerate(DIFFICULTIES):
             def make_callback(d=diff):
                 return lambda: self.set_difficulty(d)
             btn = Button(diff, center_x, y_start + i*spacing, 200, 60, make_callback())
             buttons.append(btn)
 
         # Back button
-        back_btn = Button("Back", center_x, y_start + len(["Easy","Normal","Hard"])*spacing, 200, 60, self.exit)
+        back_btn = Button("Back", center_x, y_start + len(DIFFICULTIES)*spacing, 200, 60, self.exit)
         buttons.append(back_btn)
 
         self.button_group = ButtonGroup(buttons)
