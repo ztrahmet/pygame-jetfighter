@@ -1,35 +1,60 @@
+# -*- coding: utf-8 -*-
 """
 explosion.py
 
-Handle explosion effects in the game.
+Explosion sprite for Jet Fighter.
+
+This module defines the :class:`Explosion` class, which represents a
+temporary visual and audio effect when enemies or missiles are destroyed.
 """
+
+from __future__ import annotations
 
 import pygame
 from src.settings import Screen
 
 
 class Explosion(pygame.sprite.Sprite):
-    """Explosion class representing explosion effects."""
+    """
+    Explosion sprite with sound and limited lifetime.
 
-    # Image source
-    IMAGE_PATH = 'assets/images/explosion.png'
+    Attributes:
+        IMAGE_PATH (str): Path to the explosion image file.
+        SOUND_PATH (str): Path to the explosion sound effect.
+        DURATION (int): Lifetime of the explosion in frames.
+        image (pygame.Surface): Current explosion image.
+        rect (pygame.Rect): Rectangle defining position and size.
+        timer (int): Remaining frames before the explosion disappears.
+    """
 
-    # Explosion parameters
-    DURATION = Screen.FPS // 10  # in frames
+    IMAGE_PATH: str = "assets/images/explosion.png"
+    SOUND_PATH: str = "assets/sounds/explosion.wav"
+    DURATION: int = Screen.FPS // 5  # frames to stay visible (0.2s)
 
-    def __init__(self, x: int, y: int):
-        """Initialize the explosion."""
+    def __init__(self, x: int, y: int) -> None:
+        """
+        Initialize the explosion sprite.
+
+        Args:
+            x (int): Initial x-coordinate (center).
+            y (int): Initial y-coordinate (top).
+        """
         super().__init__()
-        self.image = pygame.image.load(self.IMAGE_PATH).convert_alpha()
-        self.rect = self.image.get_rect(center=(x, y))
-        self.timer = self.DURATION
+        self.image: pygame.Surface = pygame.image.load(self.IMAGE_PATH).convert_alpha()
+        self.rect: pygame.Rect = self.image.get_rect(center=(x, y))
+        self.timer: int = self.DURATION
 
-        # Play explosion sound
-        explosion_sound = pygame.mixer.Sound('assets/sounds/explosion.wav')
-        explosion_sound.play()
+        # Play explosion sound effect
+        try:
+            explosion_sound = pygame.mixer.Sound(self.SOUND_PATH)
+            explosion_sound.play()
+        except pygame.error:
+            # If sound file missing or mixer not initialized, ignore gracefully
+            pass
 
-    def update(self):
-        """Update explosion state."""
+    # ---------------- Update ----------------
+    def update(self) -> None:
+        """Countdown timer and remove explosion after duration ends."""
         self.timer -= 1
         if self.timer <= 0:
             self.kill()

@@ -1,20 +1,39 @@
+# -*- coding: utf-8 -*-
 """
 boss.py
 
-Special Boss enemy that inherits from Enemy.
-Spawns rarely and rewards multiple missiles on defeat.
+Special boss enemy sprite for Jet Fighter.
+
+This module defines the :class:`Boss` class, which inherits from
+:class:`Enemy` but uses a different sprite to represent a larger,
+rarer, and more rewarding enemy.
 """
 
+from __future__ import annotations
+
 import pygame
+
 from src.enemy import Enemy
 
 
 class Boss(Enemy):
-    """Boss enemy with higher health and bigger sprite."""
+    """
+    Boss enemy sprite.
 
-    # Image source
-    IMAGE_PATH = 'assets/images/boss.png'
+    Inherits from :class:`Enemy`, but uses a different image. Bosses
+    appear rarely and grant bonus rewards when destroyed.
+    """
 
-    def __init__(self, x: int, y: int):
+    IMAGE_PATH: str = "assets/images/boss.png"
+
+    def __init__(self, x: int, y: int) -> None:
+        """
+        Initialize the boss enemy sprite.
+
+        Args:
+            x (int): Initial x-coordinate (center).
+            y (int): Initial y-coordinate (top).
+        """
         super().__init__(x, y)
-        self.image = pygame.image.load(self.IMAGE_PATH).convert_alpha()
+        self.image: pygame.Surface = pygame.image.load(self.IMAGE_PATH).convert_alpha()
+        self.rect: pygame.Rect = self.image.get_rect(center=(x, y))

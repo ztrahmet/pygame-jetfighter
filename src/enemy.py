@@ -1,32 +1,54 @@
+# -*- coding: utf-8 -*-
 """
 enemy.py
 
-Handle enemy characters and related actions.
+Enemy sprite for Jet Fighter.
+
+This module defines the :class:`Enemy` class, which represents standard
+enemy units that move downward from the top of the screen.
 """
 
+from __future__ import annotations
+
 import pygame
-from src.settings import Enemy as Enemy_CONFIG, Screen
+
+from src.settings import Screen
 
 
 class Enemy(pygame.sprite.Sprite):
-    """Enemy class representing the alien objects."""
+    """
+    Enemy sprite that falls from the top of the screen.
 
-    # Image source
-    IMAGE_PATH = 'assets/images/enemy.png'
+    Attributes:
+        IMAGE_PATH (str): Path to the enemy image file.
+        SPEED (int): Vertical movement speed of the enemy.
+        image (pygame.Surface): Current enemy image.
+        rect (pygame.Rect): Rectangle defining position and size.
+        reached (bool): Whether the enemy has reached the bottom of the screen.
+    """
 
-    # Enemy configuration
-    SPEED = Enemy_CONFIG.SPEED
+    IMAGE_PATH: str = "assets/images/enemy.png"
+    SPEED: int = 3
 
-    def __init__(self, x: int, y: int):
-        """Initialize the enemy."""
+    def __init__(self, x: int, y: int) -> None:
+        """
+        Initialize the enemy sprite.
+
+        Args:
+            x (int): Initial x-coordinate (center).
+            y (int): Initial y-coordinate (top).
+        """
         super().__init__()
-        self.image = pygame.image.load(self.IMAGE_PATH).convert_alpha()
-        self.rect = self.image.get_rect(center=(x, y))
-        self.reached = False
-    
-    def update(self):
-        """Update enemy position."""
+        self.image: pygame.Surface = pygame.image.load(self.IMAGE_PATH).convert_alpha()
+        self.rect: pygame.Rect = self.image.get_rect(center=(x, y))
+
+        # True if the enemy reaches the bottom
+        self.reached: bool = False
+
+    # ---------------- Update ----------------
+    def update(self) -> None:
+        """Move enemy downward and check if it reaches the bottom of the screen."""
         self.rect.y += self.SPEED
-        if self.rect.top > Screen.HEIGHT: # If enemy reaches bottom
+        if self.rect.top > Screen.HEIGHT:
             self.reached = True
-            # Kill self in game.py
+            # kill is handled in play.py

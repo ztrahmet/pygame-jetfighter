@@ -1,55 +1,91 @@
+# -*- coding: utf-8 -*-
 """
 player.py
 
-Handle player character and related actions.
+Player-controlled jet fighter sprite for Jet Fighter.
+
+This module defines the :class:`Player` class, which handles movement,
+rendering, and temporary invincibility ("blinking") after being hit.
 """
 
+from __future__ import annotations
+
 import pygame
-from src.settings import Player as Player_CONFIG, Screen
+
+from src.settings import Screen
 
 
 class Player(pygame.sprite.Sprite):
-    """Player class representing the jet fighter."""
+    """
+    Player jet sprite.
 
-    # Image source
-    IMAGE_PATH = 'assets/images/player.png'
+    Attributes:
+        IMAGE_PATH (str): Path to the player image file.
+        SPEED (int): Horizontal movement speed of the player.
+        BLINK_DURATION (int): Duration of blinking invincibility in frames.
+        image (pygame.Surface): The current player image.
+        rect (pygame.Rect): Rectangle defining position and size.
+        blink_timer (int): Remaining frames of invincibility blinking.
+        visible (bool): Whether the sprite is currently drawn (for blinking).
+    """
 
-    # Blinking effect parameters
-    BLINK_DURATION = Screen.FPS // 10 # in frames
-    BLINK_COUNT = 5
+    IMAGE_PATH: str = "assets/images/player.png"
+    SPEED: int = 6
+    BLINK_DURATION: int = Screen.FPS // 6 # 1/6 of a second
 
-    # Player configuration
-    SPEED = Player_CONFIG.SPEED
+    def __init__(self, x: int, y: int) -> None:
+        """
+        Initialize the player sprite.
 
-    def __init__(self, x: int, y: int):
-        """Initialize the player."""
+        Args:
+            x (int): Initial x-coordinate (center).
+            y (int): Initial y-coordinate (top).
+        """
         super().__init__()
-        self.image = pygame.image.load(self.IMAGE_PATH).convert_alpha()
-        self.rect = self.image.get_rect(center=(x, y))
-        self.blink_timer = 0
-        self.blink_count = 0
-    
-    def update(self, keys):
-        """Update player position based on key presses."""
-        if keys[pygame.K_LEFT] and self.rect.left > 0:
+        self.image: pygame.Surface = pygame.image.load(self.IMAGE_PATH).convert_alpha()
+        self.rect: pygame.Rect = self.image.get_rect(center=(x, y))
+
+        # Blinking (invincibility) state
+        self.blink_timer: int = 0
+
+    # ---------------- Update ----------------
+    def update(self, keys: pygame.key.ScancodeWrapper) -> None:
+        """
+        Update player movement and blinking.
+
+        Args:
+            keys (pygame.key.ScancodeWrapper): Current key press states.
+        """
+        # Movement
+        if keys[pygame.K_LEFT]:
             self.rect.x -= self.SPEED
-        if keys[pygame.K_RIGHT] and self.rect.right < Screen.WIDTH:
+        if keys[pygame.K_RIGHT]:
             self.rect.x += self.SPEED
-        
-        # Handle blinking effect
-        if self.blink_count > 0:
+
+        # Keep inside screen bounds
+        self.rect.clamp_ip(pygame.Rect(0, 0, Screen.WIDTH, Screen.HEIGHT))
+
+        # Handle blinking
+        if self.blink_timer > 0:
             self.blink_timer -= 1
-            if self.blink_timer <= 0:
-                # Toggle alpha between 128 and 255
-                current_alpha = self.image.get_alpha()
-                self.image.set_alpha(255 if current_alpha == 128 else 128)
-                self.blink_count -= 1
-                self.blink_timer = self.BLINK_DURATION
+            self.image.set_alpha(64)
         else:
             self.image.set_alpha(255)
-    
-    def blink(self):
-        """Start the blink effect (for invincibility frames)."""
-        self.blink_count = self.BLINK_COUNT
+
+    # ---------------- Effects ----------------
+    def blink(self) -> None:
+        """Trigger blinking effect for temporary invincibility."""
         self.blink_timer = self.BLINK_DURATION
-        self.image.set_alpha(128)
+
+    # ---------------- Drawing ----------------
+    def draw(self, surface: pygame.Surface) -> None:
+        """
+        Draw the player if visible (used in manual rendering scenarios).
+
+        Args:
+            surface (pygame.Surface): The surface to draw on.
+        """
+
+    def kill(self) -> None:
+        """Remove the player from all sprite groups."""
+        super().kill()

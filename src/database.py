@@ -1,95 +1,115 @@
+# -*- coding: utf-8 -*-
 """
 database.py
 
-Handle database operations for the game, including saving and retrieving scores.
+SQLite-based database management for Jet Fighter.
+
+This module defines the :class:`Database` class, which is responsible for
+storing and retrieving game scores. It ensures the database and schema exist,
+and provides methods for saving new scores and fetching high scores.
+
+The database is stored in ``db/game.db`` and is kept lightweight.
 """
 
-from os import makedirs, path
-from sqlite3 import connect, Connection, Cursor
-from typing import List, Tuple # type hints for older Python versions (<3.9)
+from __future__ import annotations
 
-DB_PATH = 'db/game.db'
+import os
+import sqlite3
+from typing import List, Tuple
 
 
 class Database:
-    """A simple wrapper for SQLite operations for the game."""
+    """
+    Handle database operations for Jet Fighter scores.
 
-    def __init__(self, db_path: str = DB_PATH):
-        """
-        Initialize the Database instance.
+    Attributes:
+        DB_DIR (str): Directory path for the database file.
+        DB_FILE (str): Full file path for the SQLite database.
+    """
 
-        Args:
-            db_path (str): Path to the SQLite database file.
-        """
-        self.db_path = db_path
-        self._init_db()
+    DB_DIR: str = "db"
+    DB_FILE: str = os.path.join(DB_DIR, "game.db")
 
-    def _connect(self) -> Connection:
-        """Create a connection to the SQLite database."""
-        return connect(self.db_path)
+    def __init__(self) -> None:
+        """Initialize the database and create the scores table if needed."""
+        os.makedirs(self.DB_DIR, exist_ok=True)
+        self.create_table()
 
-    def _init_db(self):
-        """Initialize the database and create the scores table if it doesn't exist."""
-        # Create db folder if it doesn't exist
-        db_dir = path.dirname(self.db_path)
-        if not path.exists(db_dir):
-            makedirs(db_dir)
-
-        # Create scores table if it doesn't exist
-        with self._connect() as conn:
-            conn.execute('''
+    # ---------------- Table setup ----------------
+    def create_table(self) -> None:
+        """Create the ``scores`` table if it does not already exist."""
+        with sqlite3.connect(self.DB_FILE) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS scores (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     score INTEGER NOT NULL,
                     difficulty TEXT NOT NULL,
-                    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
-            ''')
-            conn.commit()
-
-    def save_score(self, score: int, difficulty: str):
-        """
-        Save a player's score to the database.
-
-        Args:
-            score (int): Player's score.
-        """
-        with self._connect() as conn:
-            conn.execute(
-                'INSERT INTO scores (score, difficulty) VALUES (?, ?)',
-                (score, difficulty)
+                """
             )
             conn.commit()
 
-            # Check the number of entries and delete the lowest score if exceeding 100
-            cursor: Cursor = conn.execute('SELECT COUNT(*) FROM scores')
-            total_rows = cursor.fetchone()[0]
+    # ---------------- Save score ----------------
+    def save_score(self, score: int, difficulty: str) -> None:
+        """
+        Insert a new score into the database.
 
-            if total_rows > 100:
-                # Delete the exstra rows
-                conn.execute('''
+        Args:
+            score (int): The player's final score.
+            difficulty (str): The difficulty setting at which the score was earned.
+        """
+        with sqlite3.connect(self.DB_FILE) as conn:
+            cursor = conn.cursor()
+
+            cursor.execute(
+                """
+                INSERT INTO scores (score, difficulty)
+                VALUES (?, ?)
+                """,
+                (score, difficulty),
+            )
+            conn.commit()
+
+            # Keep only the latest 100 scores
+            cursor.execute("SELECT COUNT(*) FROM scores")
+            count = cursor.fetchone()[0]
+            if count > 100:
+                cursor.execute(
+                    """
                     DELETE FROM scores
                     WHERE id IN (
                         SELECT id FROM scores
-                        ORDER BY score ASC, date ASC
+                        ORDER BY created_at ASC
                         LIMIT ?
                     )
-                ''', (total_rows - 100,))
+                    """,
+                    (count - 100,),
+                )
                 conn.commit()
 
-    def get_high_scores(self, limit: int = 5) -> List[Tuple[str, int, str]]:
+    # ---------------- High scores ----------------
+    def get_high_scores(self, limit: int = 5) -> List[Tuple[int, str, str]]:
         """
-        Retrieve the top scores from the database.
+        Retrieve the top high scores.
 
         Args:
-            limit (int): Number of top scores to return.
+            limit (int): Maximum number of high scores to return.
 
         Returns:
-            List of tuples: Each tuple contains (score, date).
+            list[tuple[int, str, str]]: List of (score, difficulty, created_at).
         """
-        with self._connect() as conn:
-            cursor: Cursor = conn.execute(
-                'SELECT score, difficulty, date FROM scores ORDER BY score DESC LIMIT ?',
+        with sqlite3.connect(self.DB_FILE) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT score, difficulty, created_at
+                FROM scores
+                ORDER BY score DESC
+                LIMIT ?
+                """,
                 (limit,)
             )
             return cursor.fetchall()

@@ -1,97 +1,113 @@
+# -*- coding: utf-8 -*-
 """
 settings.py
 
-Global configuration constants for the game, including screen, player, and enemy settings.
+Game configuration and settings menu for Jet Fighter.
+
+This module contains:
+- Global screen and gameplay constants (sizes, FPS, assets).
+- The SettingsGUI class, which allows the player to configure difficulty
+  interactively via a button menu.
 """
 
+from __future__ import annotations
+
 import pygame
+
 from src.button import Button, ButtonGroup
 
-DIFFICULTIES = ['Easy', 'Normal', 'Hard']
 
 class Screen:
     """Screen configuration constants."""
-    WIDTH = 800
-    HEIGHT = 600
-    FPS = 60
-    BACKGROUND_IMAGE = 'assets/images/background.png'
+
+    WIDTH: int = 800
+    HEIGHT: int = 600
+    FPS: int = 60
+    BACKGROUND_IMAGE: str = "assets/images/background.png"
 
 
 class Game:
-    """Game configuration constants."""
-    DIFFICULTY = 'Normal'
-    HEART = 3
-    MISSILES = 5
+    """Gameplay configuration constants."""
 
+    DIFFICULTY: str = "Normal"  # Default difficulty
+    HEART: int = 3              # Initial number of lives
+    MISSILES: int = 10          # Initial missile count
 
-class Player:
-    """Player configuration constants."""
-    SPEED = 6
-    MISSILE_SPEED = 7
-
-
-class Enemy:
-    """Enemy configuration constants."""
-    SPEED = 3
 
 class SettingsGUI:
-    """Settings GUI with buttons."""
+    """
+    In-game settings menu for configuring difficulty.
 
-    def __init__(self, screen):
-        self.screen = screen
-        self.running = True
-        self.clock = pygame.time.Clock()
-        self.title_font = pygame.font.SysFont(None, 64)
+    Attributes:
+        screen (pygame.Surface): The active game surface.
+        font (pygame.font.Font): Font for rendering text.
+        buttons (ButtonGroup): Group of interactive buttons.
+        running (bool): Whether the settings menu loop is active.
+    """
+
+    def __init__(self, screen: pygame.Surface) -> None:
+        """Initialize the settings menu with difficulty buttons."""
+        self.screen: pygame.Surface = screen
+        self.font: pygame.font.Font = pygame.font.SysFont(None, 48)
+        self.small_font: pygame.font.Font = pygame.font.SysFont(None, 32)
+        self.running: bool = True
+
+        # Create interactive buttons for the settings menu
         self.create_buttons()
+    
+    def create_buttons(self) -> None:
+        """Initialize the settings menu buttons and group them together."""
+        center_x: int = Screen.WIDTH // 2 - 100
+        buttons = [
+            Button("Easy", center_x, 180, 200, 60, lambda: self.set_difficulty("Easy")),
+            Button("Normal", center_x, 250, 200, 60, lambda: self.set_difficulty("Normal")),
+            Button("Hard", center_x, 320, 200, 60, lambda: self.set_difficulty("Hard")),
+            Button("Back", center_x, 400, 200, 60, self.close),
+        ]
+        self.buttons: ButtonGroup = ButtonGroup(buttons)
 
-    def create_buttons(self):
-        center_x = Screen.WIDTH // 2 - 100
-        y_start = 180
-        spacing = 70
+    # ---------------- Menu loop ----------------
+    def run(self) -> None:
+        """Run the settings menu loop until closed."""
+        while self.running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+                self.buttons.handle_event(event)
 
-        buttons = []
+            self.draw()
+            pygame.display.flip()
 
-        # Difficulty buttons
-        for i, diff in enumerate(DIFFICULTIES):
-            def make_callback(d=diff):
-                return lambda: self.set_difficulty(d)
-            btn = Button(diff, center_x, y_start + i*spacing, 200, 60, make_callback())
-            buttons.append(btn)
+    # ---------------- Button actions ----------------
+    def set_difficulty(self, difficulty: str) -> None:
+        """
+        Set the global game difficulty and close the menu.
 
-        # Back button
-        back_btn = Button("Back", center_x, y_start + len(DIFFICULTIES)*spacing, 200, 60, self.exit)
-        buttons.append(back_btn)
-
-        self.button_group = ButtonGroup(buttons)
-
-    def set_difficulty(self, difficulty):
+        Args:
+            difficulty (str): The difficulty level to set.
+        """
         Game.DIFFICULTY = difficulty
-
-    def exit(self):
         self.running = False
 
-    def handle_events(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.running = False
-            self.button_group.handle_event(event)
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                self.exit()
+    def close(self) -> None:
+        """Close the settings menu without changes."""
+        self.running = False
 
-    def draw(self):
-        self.screen.fill((20, 20, 40))
-        title = self.title_font.render("Settings", True, (0, 255, 255))
+    # ---------------- Drawing ----------------
+    def draw(self) -> None:
+        """Render the settings menu UI on the screen."""
+        self.screen.fill((0, 0, 30))
+
+        # Title
+        title: pygame.Surface = self.font.render("Settings", True, (255, 255, 0))
         self.screen.blit(title, (Screen.WIDTH // 2 - title.get_width() // 2, 100))
 
-        info_font = pygame.font.SysFont(None, 36)
-        info_text = info_font.render(f"Current Difficulty: {Game.DIFFICULTY}", True, (255,255,255))
-        self.screen.blit(info_text, (Screen.WIDTH//2 - info_text.get_width()//2, 500))
+        # Current difficulty info
+        difficulty_text: pygame.Surface = self.small_font.render(
+            f"Current Difficulty: {Game.DIFFICULTY}", True, (200, 200, 200)
+        )
+        self.screen.blit(difficulty_text,
+                         (Screen.WIDTH // 2 - difficulty_text.get_width() // 2, 150))
 
-        self.button_group.draw(self.screen)
-        pygame.display.flip()
-
-    def run(self):
-        while self.running:
-            self.clock.tick(Screen.FPS)
-            self.handle_events()
-            self.draw()
+        # Buttons
+        self.buttons.draw(self.screen)
