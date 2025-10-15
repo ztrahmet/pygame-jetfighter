@@ -1,13 +1,10 @@
-<!-- GitHub renderer supports HTML inside Markdown -->
-<h1 style="display: flex; align-items: center;">
-  <img src="docs/logos/game.png" alt="Game Logo" height="64"/>
-  <span style="margin-left: 16">Jet Fighter</span>
-</h1>
+# Jet Fighter
 
 <p align="left">
-  <img src="docs/logos/cs50.png" alt="CS50 Logo" height="32"/>
-  <img src="docs/logos/python.png" alt="Python Logo" height="32"/>
+  <img src="docs/logos/game.png" alt="Game Logo" height="32"/>
   <img src="docs/logos/pygame.png" alt="Pygame Logo" height="32"/>
+  <img src="docs/logos/python.png" alt="Python Logo" height="32"/>
+  <img src="docs/logos/cs50.png" alt="CS50 Logo" height="32"/>
 </p>
 
 **Jet Fighter** is a 2D arcade-style shooter developed as a **CS50x 2025 Final Project**. Pilot your jet, destroy enemies, and compete for high scores!
